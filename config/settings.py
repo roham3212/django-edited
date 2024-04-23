@@ -18,6 +18,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Application definition
+SECRET_KEY = 'django-insecure-x3hca8q@6lavbm^&+2-@g*sr3z%=!ks1!*o8#^e^dxiw22yg^'
+DEBUG = True
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,6 +54,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'mail_templated',
+    "corsheaders",
 ]
 
 SITE_ID = 3
@@ -56,11 +67,18 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
+ALLOWED_HOSTS = ['*']
 
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+# ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -126,6 +144,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 MEDIA_URL = 'media/'
+STATIC_ROOT = BASE_DIR.joinpath('static/')
+MEDIA_ROOT = BASE_DIR.joinpath('media/')
+
+# STATICFILES_DIRS = [
+#     BASE_DIR/'static',
+#     BASE_DIR/'media',
+# ]
 
 
 # Default primary key field type
@@ -156,3 +181,34 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 } 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp4dev'
+EMAIL_USE_TLS = False
+EMAIL_PORT = 25
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+
+
+
+CELERY_BROKER_URL = "redis://redis:6379/1"
+CELERY_RESAULT_BACKEND = "db+sqlite:///results.sqlite"
+
+CELERY_BEAT_SCHEDULE = {
+    "clean_unverified_users" : {
+        "task" : "root.tasks.clean_unverified_users", 
+        "schedule" : 10.0,
+    }
+
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
